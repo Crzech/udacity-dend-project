@@ -61,7 +61,7 @@ staging_songs_table_create = ("""
 
 songplay_table_create = ("""
     CREATE TABLE songplay (
-        songplay_id BIGINT IDENTITY(0, 1) NOT NULL,
+        songplay_id BIGINT IDENTITY(0, 1) NOT NULL PRIMARY KEY,
         start_time INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
         level VARCHAR(4) NOT NULL,
@@ -75,7 +75,7 @@ songplay_table_create = ("""
 
 user_table_create = ("""
     CREATE TABLE users (
-        user_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL PRIMARY KEY,
         first_name VARCHAR(50) NOT NULL,
         last_name VARCHAR(50) NOT NULL,
         gender CHARACTER(1) NOT NULL,
@@ -85,7 +85,7 @@ user_table_create = ("""
 
 song_table_create = ("""
     CREATE TABLE songs (
-        song_id VARCHAR(150) NOT NULL,
+        song_id VARCHAR(150) NOT NULL PRIMARY KEY,
         title VARCHAR(50) NOT NULL,
         artist_id VARCHAR(150) NOT NULL,
         year INTEGER NOT NULL,
@@ -95,7 +95,7 @@ song_table_create = ("""
 
 artist_table_create = ("""
     CREATE TABLE artists (
-        artist_id VARCHAR(150) NOT NULL,
+        artist_id VARCHAR(150) NOT NULL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         location VARCHAR(150) NOT NULL,
         lattitude DOUBLE PRECISION,
@@ -105,7 +105,7 @@ artist_table_create = ("""
 
 time_table_create = ("""
     CREATE TABLE time (
-        start_time INTEGER NOT NULL,
+        start_time INTEGER NOT NULL PRIMARY KEY,
         hour TIME NOT NULL,
         day INTEGER NOT NULL,
         week INTEGER NOT NULL,
@@ -159,7 +159,8 @@ user_table_insert = ("""
     INSERT INTO users
     SELECT DISTINCT userid AS user_id, firstname AS first_name, lastname AS last_name, gender AS gender, level as level
     FROM staging_events 
-    WHERE user_id IS NOT NULL 
+    WHERE page = 'NextSong'
+    AND user_id IS NOT NULL 
     AND first_name IS NOT NULL
     AND last_name IS NOT NULL
     AND gender IS NOT NULL
@@ -181,7 +182,8 @@ artist_table_insert = ("""
 time_table_insert = ("""
 INSERT INTO time
     SELECT DISTINCT CAST(EXTRACT(EPOCH FROM ts) AS INTEGER) as start_time, ts::timestamp::time as hour, EXTRACT(DAY FROM ts) as day, EXTRACT(WEEK FROM ts) AS week, to_char(ts, 'Month') AS month, CAST(EXTRACT(YEAR FROM ts) AS INTEGER) as year, to_char(ts, 'Day') as weekday
-FROM staging_events; 
+FROM staging_events
+WHERE page = 'NextSong'; 
 """)
 
 # QUERY LISTS
